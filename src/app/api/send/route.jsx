@@ -1,13 +1,40 @@
 import nodemailer from 'nodemailer';
+import { NextResponse } from 'next/server';
+import { RateLimiterMemory } from 'rate-limiter-flexible';
 
-export async function POST(req, res) {
+const limiter = new RateLimiterMemory({
+  points: 1,
+  duration: 60,
+});
+
+export async function POST(req) {
   const body = await req.json();
   const mensagem = body.message;
   const senha = body.senhaApi;
+  const emailUsuario = body.emailUsuario;
   const senhaCorreta = process.env.SENHA_API;
 
   if (senha !== senhaCorreta) {
-    return new Response('Não autorizado', { status: 403 });
+    console.warn('Senha incorreta');
+    return new NextResponse('Não autorizado', { status: 403 });
+  }
+
+  if (!mensagem || !emailUsuario) {
+    console.warn('Dados incompletos');
+    return new NextResponse({ error: 'Dados incompletos' }, { status: 400 });
+  }
+
+  const ip =
+    (req.headers.get('x-forwarded-for') || '').split(',')[0].trim() ||
+    '0.0.0.0';
+
+  try {
+    await limiter.consume(ip);
+  } catch {
+    console.warn('Rate limit IP: ', ip);
+    return new NextResponse(`Aguarde alguns instantes`, {
+      status: 429,
+    });
   }
 
   const transporter = nodemailer.createTransport({
@@ -20,12 +47,12 @@ export async function POST(req, res) {
 
   const mailOptions = {
     from: process.env.MY_EMAIL,
-    to: 'vinicipkt6@gmail.com',
-    subject: 'Test Email',
+    to: process.env.EMAIL_RECEBE,
+    subject: `Pedido de ${emailUsuario}`,
     text: mensagem,
   };
 
   await transporter.sendMail(mailOptions);
 
-  return Response.json({ success: true });
+  return NextResponse.json({ success: true });
 }

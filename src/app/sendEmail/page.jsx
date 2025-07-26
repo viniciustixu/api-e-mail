@@ -1,23 +1,45 @@
 'use client';
+import { useState } from 'react';
 
 export default function SendEmailPage() {
-  const conteudo = 'bulhufas';
+  const [loading, setLoading] = useState(false);
 
-  async function sendEmail() {
+  async function sendEmail(msg, pass, email) {
+    await setLoading(true);
     const res = await fetch('/api/send', {
       method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
       body: JSON.stringify({
-        message: conteudo,
-        senhaApi: '123asc',
+        message: msg,
+        senhaApi: pass,
+        emailUsuario: email,
       }),
     });
+
+    setLoading(false);
+  }
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+
+    const formData = new FormData(e.target);
+    const email = formData.get('nEmail');
+    const senha = formData.get('nSenha');
+    const conteudo = formData.get('nContent');
+    await sendEmail(conteudo, senha, email);
   }
 
   return (
     <div>
-      <button onClick={sendEmail} className='border p-2 bg-sky-300'>
-        Enviar email
-      </button>
+      <form onSubmit={handleSubmit}>
+        <input type='text' name='nEmail' placeholder='Digite seu E-mail' />
+        <input type='password' name='nSenha' placeholder='Senha da api' />
+        <input type='text' name='nContent' placeholder='Conteudo do email' />
+        <button type='submit'>Enviar pedido</button>
+      </form>
+      <p>{loading ? 'enviando' : ''}</p>
     </div>
   );
 }
