@@ -5,7 +5,7 @@ export default function SendEmailPage() {
   const [loading, setLoading] = useState(false);
 
   async function sendEmail(msg, pass, email) {
-    await setLoading(true);
+    setLoading(true);
     const res = await fetch('/api/send', {
       method: 'POST',
       headers: {
@@ -19,6 +19,11 @@ export default function SendEmailPage() {
     });
 
     setLoading(false);
+
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data.error);
+    }
   }
 
   async function handleSubmit(e) {
@@ -28,7 +33,16 @@ export default function SendEmailPage() {
     const email = formData.get('nEmail');
     const senha = formData.get('nSenha');
     const conteudo = formData.get('nContent');
-    await sendEmail(conteudo, senha, email);
+
+    try {
+      await sendEmail(conteudo, senha, email);
+
+      e.target.nEmail.value = '';
+      e.target.nSenha.value = '';
+      e.target.nContent.value = '';
+    } catch (err) {
+      alert(err.message);
+    }
   }
 
   return (

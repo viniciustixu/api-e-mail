@@ -16,12 +16,12 @@ export async function POST(req) {
 
   if (senha !== senhaCorreta) {
     console.warn('Senha incorreta');
-    return new NextResponse('Não autorizado', { status: 403 });
+    return NextResponse.json({ error: 'Senha incorreta' }, { status: 403 });
   }
 
   if (!mensagem || !emailUsuario) {
     console.warn('Dados incompletos');
-    return new NextResponse({ error: 'Dados incompletos' }, { status: 400 });
+    return NextResponse.json({ error: 'Dados incompletos' }, { status: 400 });
   }
 
   const ip =
@@ -32,9 +32,12 @@ export async function POST(req) {
     await limiter.consume(ip);
   } catch {
     console.warn('Rate limit IP: ', ip);
-    return new NextResponse(`Aguarde alguns instantes`, {
-      status: 429,
-    });
+    return NextResponse.json(
+      { error: 'Aguarde alguns instantes' },
+      {
+        status: 429,
+      },
+    );
   }
 
   const transporter = nodemailer.createTransport({
