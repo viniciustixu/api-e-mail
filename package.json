@@ -17,6 +17,7 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "daisyui": "^5.0.50",
     "tailwindcss": "^4"
   }
 }
