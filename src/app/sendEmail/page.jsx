@@ -53,7 +53,9 @@ export default function SendEmailPage() {
 
   return (
     <div className='flex flex-col h-screen justify-center items-center'>
-      <form onSubmit={handleSubmit} className='flex flex-col gap-2 w-[300px]'>
+      <form
+        onSubmit={handleSubmit}
+        className='flex flex-col gap-2 w-[300px] mb-4'>
         <label className='input validator'>
           <svg
             className='h-[1em] opacity-50'
@@ -121,7 +123,7 @@ export default function SendEmailPage() {
         )}
       </form>
 
-      <div className='mt-4'>
+      <div className='fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 mt-40'>
         {alert == 'E-mail enviado com sucesso!' && (
           <div role='alert' className='alert alert-success'>
             <svg
